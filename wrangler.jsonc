@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "journal",
+  "account_id": "91ff95bcb91fbfa1b1c5c356262b1fe4",
   "main": "src/index.ts",
   "compatibility_date": "2025-05-30",
   "d1_databases": [
