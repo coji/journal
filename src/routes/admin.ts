@@ -140,6 +140,14 @@ admin.post('/auth', async (c) => {
   return c.json({ user: user[0] });
 });
 
+// POST /admin/logout - Admin logout
+admin.post('/logout', async (c) => {
+  // Clear the admin session cookie
+  c.header('Set-Cookie', 'admin_session=; HttpOnly; Path=/; Max-Age=0');
+  
+  return c.json({ message: 'Logged out successfully' });
+});
+
 // GET /admin - Admin dashboard HTML
 admin.get('/', async (c) => {
   // Check for simple session cookie
@@ -189,8 +197,13 @@ admin.get('/', async (c) => {
 <body>
     <div class="container">
         <div class="header">
-            <h1>Journal API - Admin Dashboard</h1>
-            <p>管理者用のダッシュボードです。ユーザーの管理を行えます。</p>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1>Journal API - Admin Dashboard</h1>
+                    <p>管理者用のダッシュボードです。ユーザーの管理を行えます。</p>
+                </div>
+                <button onclick="logout()" class="btn btn-danger">ログアウト</button>
+            </div>
         </div>
 
         <div class="section">
@@ -320,6 +333,22 @@ admin.get('/', async (c) => {
                 alert('作成に失敗しました: ' + error.message);
             }
         });
+
+        async function logout() {
+            try {
+                const response = await fetch('/admin/logout', {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    window.location.href = '/admin/login';
+                } else {
+                    alert('ログアウトに失敗しました');
+                }
+            } catch (error) {
+                alert('ログアウトに失敗しました: ' + error.message);
+            }
+        }
 
         // 初期ロード
         loadUsers();

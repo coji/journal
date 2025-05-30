@@ -126,12 +126,15 @@ pnpm deploy
 - `POST /user/resend-verification` - メール認証再送信
 - `DELETE /user/account` - アカウント削除（退会）
 
-### 管理者機能（管理者権限必須）
+### 管理者機能
 
-- `GET /admin` - 管理者ダッシュボード（HTML UI）
-- `GET /admin/users` - ユーザー一覧取得
-- `POST /admin/users` - 新規ユーザー作成
-- `DELETE /admin/users/:id` - ユーザー削除
+- `GET /admin/login` - 管理者ログインページ
+- `POST /admin/auth` - 管理者認証
+- `POST /admin/logout` - 管理者ログアウト
+- `GET /admin` - 管理者ダッシュボード（HTML UI）（権限必須）
+- `GET /admin/users` - ユーザー一覧取得（権限必須）
+- `POST /admin/users` - 新規ユーザー作成（権限必須）
+- `DELETE /admin/users/:id` - ユーザー削除（権限必須）
 
 ### ブートストラップ
 
