@@ -94,6 +94,15 @@ pnpm deploy
 - `GET /attachments/:id` - ファイル取得
 - `DELETE /attachments/:id` - ファイル削除
 
+### ユーザー管理（認証必須）
+
+- `GET /user/profile` - プロフィール取得
+- `PUT /user/profile` - プロフィール更新
+- `POST /user/change-password` - パスワード変更
+- `POST /user/request-password-reset` - パスワードリセット要求
+- `POST /user/resend-verification` - メール認証再送信
+- `DELETE /user/account` - アカウント削除（退会）
+
 ## 環境変数
 
 `wrangler.jsonc`の`vars`セクションで以下を設定：

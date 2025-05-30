@@ -12,14 +12,14 @@
     "@hono/zod-validator": "0.7.0",
     "@paralleldrive/cuid2": "2.2.2",
     "better-auth": "^1.2.3",
-    "drizzle-orm": "^0.36.4",
+    "drizzle-orm": "^0.44.0",
     "hono": "^4.7.10",
     "zod": "3.25.42"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "4.20250529.0",
     "@types/node": "^22.10.2",
-    "drizzle-kit": "^0.30.0",
+    "drizzle-kit": "^0.31.1",
     "typescript": "5.8.3",
     "wrangler": "^4.4.0"
   }

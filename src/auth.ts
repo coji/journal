@@ -18,7 +18,13 @@ export function createAuth(env: Env) {
     baseURL: env.BETTER_AUTH_URL,
     emailAndPassword: {
       enabled: true,
-      requireEmailVerification: false,
+      requireEmailVerification: true,
+      sendResetPassword: async ({ user, url }) => {
+        // パスワードリセットメールの送信ロジック
+        // 実際の実装では、CloudflareのEmail WorkersやSendGridなどを使用
+        console.log(`Send password reset email to ${user.email}: ${url}`);
+        // TODO: 実際のメール送信実装
+      },
     },
     socialProviders: {
       google: {
