@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
-import { createAuth } from './auth';
+import auth from './auth';
 import { authMiddleware } from './middleware/auth';
 import journalRoutes from './routes/journal';
 import attachmentRoutes from './routes/attachments';
@@ -75,7 +75,6 @@ app.post('/bootstrap-admin', async (c) => {
 
 // Auth routes - handled by better-auth
 app.all('/auth/*', async (c) => {
-  const auth = createAuth(c.env);
   return auth.handler(c.req.raw);
 });
 

@@ -1,5 +1,5 @@
 import { createMiddleware } from 'hono/factory';
-import { createAuth } from '../auth';
+import auth from '../auth';
 
 export const authMiddleware = createMiddleware<{
   Bindings: Env;
@@ -11,8 +11,6 @@ export const authMiddleware = createMiddleware<{
     };
   };
 }>(async (c, next) => {
-  const auth = createAuth(c.env);
-
   const authorization = c.req.header('Authorization');
   const token = authorization?.replace('Bearer ', '');
 

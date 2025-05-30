@@ -18,7 +18,7 @@ export const adminMiddleware = createMiddleware<{
   // Check for admin session cookie first
   const cookies = c.req.header('Cookie') || '';
   const sessionMatch = cookies.match(/admin_session=([^;]+)/);
-  
+
   if (sessionMatch) {
     try {
       const session = JSON.parse(atob(sessionMatch[1]));
@@ -32,13 +32,13 @@ export const adminMiddleware = createMiddleware<{
 
   // Fallback to regular auth middleware check
   const user = c.get('user');
-  
+
   if (!user) {
     return c.json({ error: 'Authentication required' }, 401);
   }
 
   const db = drizzle(c.env.DB, { schema });
-  
+
   const adminUser = await db
     .select({ isAdmin: schema.users.isAdmin })
     .from(schema.users)

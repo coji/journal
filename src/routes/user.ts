@@ -4,7 +4,7 @@ import { eq } from 'drizzle-orm';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 import * as schema from '../db/schema';
-import { createAuth } from '../auth';
+import auth from '../auth';
 
 type Variables = {
   user: {
