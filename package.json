@@ -6,7 +6,12 @@
     "cf-typegen": "wrangler types --env-interface CloudflareBindings",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "wrangler d1 migrations apply journal-db --local",
-    "db:migrate:prod": "wrangler d1 migrations apply journal-db"
+    "db:migrate:prod": "wrangler d1 migrations apply journal-db",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome lint .",
+    "format": "biome format .",
+    "format:fix": "biome format --write .",
+    "check": "biome check ."
   },
   "dependencies": {
     "@hono/zod-validator": "0.7.0",
@@ -17,6 +22,7 @@
     "zod": "3.25.42"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.3.10",
     "@cloudflare/workers-types": "4.20250529.0",
     "@types/node": "^22.10.2",
     "drizzle-kit": "^0.31.1",
