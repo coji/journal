@@ -1,5 +1,6 @@
 {
   "name": "journal",
+  "packageManager": "pnpm@10.25.0",
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy --minify",
