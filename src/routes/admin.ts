@@ -1,33 +1,33 @@
-import { Hono } from 'hono';
-import { drizzle } from 'drizzle-orm/d1';
-import { eq, desc } from 'drizzle-orm';
-import { zValidator } from '@hono/zod-validator';
-import { z } from 'zod';
-import * as schema from '../db/schema';
-import { html } from 'hono/html';
+import { Hono } from 'hono'
+import { drizzle } from 'drizzle-orm/d1'
+import { eq, desc } from 'drizzle-orm'
+import { zValidator } from '@hono/zod-validator'
+import { z } from 'zod'
+import * as schema from '../db/schema'
+import { html } from 'hono/html'
 
 type Variables = {
-  user: {
-    id: string;
-    email: string;
-    name: string;
-  };
-};
+	user: {
+		id: string
+		email: string
+		name: string
+	}
+}
 
-const admin = new Hono<{ Bindings: Env; Variables: Variables }>();
+const admin = new Hono<{ Bindings: Env; Variables: Variables }>()
 
 // Import admin middleware for protected routes
-import { adminMiddleware } from '../middleware/admin';
+import { adminMiddleware } from '../middleware/admin'
 
 const createUserSchema = z.object({
-  email: z.string().email(),
-  name: z.string().min(1),
-  isAdmin: z.boolean().optional().default(false),
-});
+	email: z.string().email(),
+	name: z.string().min(1),
+	isAdmin: z.boolean().optional().default(false),
+})
 
 // GET /admin/login - Admin login page
 admin.get('/login', async (c) => {
-  const loginHtml = html` <!DOCTYPE html>
+	const loginHtml = html` <!DOCTYPE html>
     <html>
       <head>
         <title>Admin Login - Journal API</title>
@@ -148,85 +148,85 @@ admin.get('/login', async (c) => {
             });
         </script>
       </body>
-    </html>`;
+    </html>`
 
-  return c.html(loginHtml);
-});
+	return c.html(loginHtml)
+})
 
 // POST /admin/auth - Admin authentication
 admin.post('/auth', async (c) => {
-  const { email, password } = await c.req.json();
-  const db = drizzle(c.env.DB, { schema });
+	const { email, password } = await c.req.json()
+	const db = drizzle(c.env.DB, { schema })
 
-  // For bootstrap admin users who don't have passwords yet
-  if (!password) {
-    return c.json({ error: 'Password is required' }, 400);
-  }
+	// For bootstrap admin users who don't have passwords yet
+	if (!password) {
+		return c.json({ error: 'Password is required' }, 400)
+	}
 
-  // Check if user exists and is admin
-  const user = await db
-    .select({
-      id: schema.users.id,
-      email: schema.users.email,
-      name: schema.users.name,
-      isAdmin: schema.users.isAdmin,
-    })
-    .from(schema.users)
-    .where(eq(schema.users.email, email))
-    .limit(1);
+	// Check if user exists and is admin
+	const user = await db
+		.select({
+			id: schema.users.id,
+			email: schema.users.email,
+			name: schema.users.name,
+			isAdmin: schema.users.isAdmin,
+		})
+		.from(schema.users)
+		.where(eq(schema.users.email, email))
+		.limit(1)
 
-  if (!user[0] || !user[0].isAdmin) {
-    return c.json(
-      { error: 'Invalid credentials or insufficient permissions' },
-      401
-    );
-  }
+	if (!user[0] || !user[0].isAdmin) {
+		return c.json(
+			{ error: 'Invalid credentials or insufficient permissions' },
+			401,
+		)
+	}
 
-  // For simplicity, create a simple session
-  // In production, you should use proper authentication
-  const sessionToken = btoa(
-    JSON.stringify({
-      userId: user[0].id,
-      email: user[0].email,
-      name: user[0].name,
-    })
-  );
+	// For simplicity, create a simple session
+	// In production, you should use proper authentication
+	const sessionToken = btoa(
+		JSON.stringify({
+			userId: user[0].id,
+			email: user[0].email,
+			name: user[0].name,
+		}),
+	)
 
-  // Set cookie
-  c.header(
-    'Set-Cookie',
-    `admin_session=${sessionToken}; HttpOnly; Path=/; Max-Age=86400`
-  );
+	// Set cookie
+	c.header(
+		'Set-Cookie',
+		`admin_session=${sessionToken}; HttpOnly; Path=/; Max-Age=86400`,
+	)
 
-  return c.json({ user: user[0] });
-});
+	return c.json({ user: user[0] })
+})
 
 // POST /admin/logout - Admin logout
 admin.post('/logout', async (c) => {
-  // Clear the admin session cookie
-  c.header('Set-Cookie', 'admin_session=; HttpOnly; Path=/; Max-Age=0');
+	// Clear the admin session cookie
+	c.header('Set-Cookie', 'admin_session=; HttpOnly; Path=/; Max-Age=0')
 
-  return c.json({ message: 'Logged out successfully' });
-});
+	return c.json({ message: 'Logged out successfully' })
+})
 
 // GET /admin - Admin dashboard HTML
 admin.get('/', async (c) => {
-  // Check for simple session cookie
-  const cookies = c.req.header('Cookie') || '';
-  const sessionMatch = cookies.match(/admin_session=([^;]+)/);
+	// Check for simple session cookie
+	const cookies = c.req.header('Cookie') || ''
+	const sessionMatch = cookies.match(/admin_session=([^;]+)/)
 
-  if (!sessionMatch) {
-    return c.redirect('/admin/login');
-  }
+	if (!sessionMatch) {
+		return c.redirect('/admin/login')
+	}
 
-  try {
-    const session = JSON.parse(atob(sessionMatch[1]));
-    c.set('user', session);
-  } catch {
-    return c.redirect('/admin/login');
-  }
+	try {
+		const session = JSON.parse(atob(sessionMatch[1]))
+		c.set('user', session)
+	} catch {
+		return c.redirect('/admin/login')
+	}
 
-  const adminHtml = html` <!DOCTYPE html>
+	const adminHtml = html` <!DOCTYPE html>
     <html>
       <head>
         <title>Admin Dashboard - Journal API</title>
@@ -531,135 +531,133 @@ admin.get('/', async (c) => {
           loadUsers();
         </script>
       </body>
-    </html>`;
+    </html>`
 
-  return c.html(adminHtml);
-});
+	return c.html(adminHtml)
+})
 
 // GET /admin/users - Get all users (API)
 admin.get('/users', adminMiddleware, async (c) => {
-  const db = drizzle(c.env.DB, { schema });
+	const db = drizzle(c.env.DB, { schema })
 
-  const allUsers = await db
-    .select({
-      id: schema.users.id,
-      email: schema.users.email,
-      name: schema.users.name,
-      emailVerified: schema.users.emailVerified,
-      isAdmin: schema.users.isAdmin,
-      image: schema.users.image,
-      createdAt: schema.users.createdAt,
-    })
-    .from(schema.users)
-    .orderBy(desc(schema.users.createdAt));
+	const allUsers = await db
+		.select({
+			id: schema.users.id,
+			email: schema.users.email,
+			name: schema.users.name,
+			emailVerified: schema.users.emailVerified,
+			isAdmin: schema.users.isAdmin,
+			image: schema.users.image,
+			createdAt: schema.users.createdAt,
+		})
+		.from(schema.users)
+		.orderBy(desc(schema.users.createdAt))
 
-  return c.json(allUsers);
-});
+	return c.json(allUsers)
+})
 
 // POST /admin/users - Create new user
 admin.post(
-  '/users',
-  adminMiddleware,
-  zValidator('json', createUserSchema),
-  async (c) => {
-    const { email, name, isAdmin } = c.req.valid('json');
-    const db = drizzle(c.env.DB, { schema });
+	'/users',
+	adminMiddleware,
+	zValidator('json', createUserSchema),
+	async (c) => {
+		const { email, name, isAdmin } = c.req.valid('json')
+		const db = drizzle(c.env.DB, { schema })
 
-    try {
-      // Check if user already exists
-      const existingUser = await db
-        .select({ id: schema.users.id })
-        .from(schema.users)
-        .where(eq(schema.users.email, email))
-        .limit(1);
+		try {
+			// Check if user already exists
+			const existingUser = await db
+				.select({ id: schema.users.id })
+				.from(schema.users)
+				.where(eq(schema.users.email, email))
+				.limit(1)
 
-      if (existingUser.length > 0) {
-        return c.json({ error: 'User with this email already exists' }, 400);
-      }
+			if (existingUser.length > 0) {
+				return c.json({ error: 'User with this email already exists' }, 400)
+			}
 
-      // Create user directly in database (bypassing better-auth for admin creation)
-      // Note: Password will be set when user first signs in via better-auth
-      const newUser = await db
-        .insert(schema.users)
-        .values({
-          email,
-          name,
-          emailVerified: true, // Admin-created users are pre-verified
-          isAdmin,
-        })
-        .returning({
-          id: schema.users.id,
-          email: schema.users.email,
-          name: schema.users.name,
-          isAdmin: schema.users.isAdmin,
-          emailVerified: schema.users.emailVerified,
-          createdAt: schema.users.createdAt,
-        });
+			// Create user directly in database (bypassing better-auth for admin creation)
+			// Note: Password will be set when user first signs in via better-auth
+			const newUser = await db
+				.insert(schema.users)
+				.values({
+					email,
+					name,
+					emailVerified: true, // Admin-created users are pre-verified
+					isAdmin,
+				})
+				.returning({
+					id: schema.users.id,
+					email: schema.users.email,
+					name: schema.users.name,
+					isAdmin: schema.users.isAdmin,
+					emailVerified: schema.users.emailVerified,
+					createdAt: schema.users.createdAt,
+				})
 
-      return c.json(newUser[0], 201);
-    } catch (error) {
-      console.error('User creation error:', error);
-      return c.json({ error: 'Failed to create user' }, 500);
-    }
-  }
-);
+			return c.json(newUser[0], 201)
+		} catch (error) {
+			console.error('User creation error:', error)
+			return c.json({ error: 'Failed to create user' }, 500)
+		}
+	},
+)
 
 // DELETE /admin/users/:id - Delete user
 admin.delete('/users/:id', adminMiddleware, async (c) => {
-  const userId = c.req.param('id');
-  const db = drizzle(c.env.DB, { schema });
+	const userId = c.req.param('id')
+	const db = drizzle(c.env.DB, { schema })
 
-  try {
-    // Check if user exists
-    const userToDelete = await db
-      .select({ id: schema.users.id })
-      .from(schema.users)
-      .where(eq(schema.users.id, userId))
-      .limit(1);
+	try {
+		// Check if user exists
+		const userToDelete = await db
+			.select({ id: schema.users.id })
+			.from(schema.users)
+			.where(eq(schema.users.id, userId))
+			.limit(1)
 
-    if (!userToDelete[0]) {
-      return c.json({ error: 'User not found' }, 404);
-    }
+		if (!userToDelete[0]) {
+			return c.json({ error: 'User not found' }, 404)
+		}
 
-    // Delete user and related data in transaction
-    await db.transaction(async (tx) => {
-      // Delete attachments metadata
-      await tx
-        .delete(schema.attachments)
-        .where(
-          eq(
-            schema.attachments.journalEntryId,
-            tx
-              .select({ id: schema.journalEntries.id })
-              .from(schema.journalEntries)
-              .where(eq(schema.journalEntries.userId, userId))
-          )
-        );
+		// Delete user and related data in transaction
+		await db.transaction(async (tx) => {
+			// Delete attachments metadata
+			await tx
+				.delete(schema.attachments)
+				.where(
+					eq(
+						schema.attachments.journalEntryId,
+						tx
+							.select({ id: schema.journalEntries.id })
+							.from(schema.journalEntries)
+							.where(eq(schema.journalEntries.userId, userId)),
+					),
+				)
 
-      // Delete journal entries
-      await tx
-        .delete(schema.journalEntries)
-        .where(eq(schema.journalEntries.userId, userId));
+			// Delete journal entries
+			await tx
+				.delete(schema.journalEntries)
+				.where(eq(schema.journalEntries.userId, userId))
 
-      // Delete OAuth tokens
-      await tx
-        .delete(schema.oauthTokens)
-        .where(eq(schema.oauthTokens.userId, userId));
+			// Delete OAuth tokens
+			await tx
+				.delete(schema.oauthTokens)
+				.where(eq(schema.oauthTokens.userId, userId))
 
-      // Delete sessions
-      await tx
-        .delete(schema.sessions)
-        .where(eq(schema.sessions.userId, userId));
+			// Delete sessions
+			await tx.delete(schema.sessions).where(eq(schema.sessions.userId, userId))
 
-      // Delete user
-      await tx.delete(schema.users).where(eq(schema.users.id, userId));
-    });
+			// Delete user
+			await tx.delete(schema.users).where(eq(schema.users.id, userId))
+		})
 
-    return c.json({ message: 'User deleted successfully' });
-  } catch (error) {
-    console.error('User deletion error:', error);
-    return c.json({ error: 'Failed to delete user' }, 500);
-  }
-});
+		return c.json({ message: 'User deleted successfully' })
+	} catch (error) {
+		console.error('User deletion error:', error)
+		return c.json({ error: 'Failed to delete user' }, 500)
+	}
+})
 
-export default admin;
+export default admin
